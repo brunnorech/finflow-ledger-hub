@@ -13,7 +13,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // This would be replaced with actual auth context
-const isAuthenticated = false; // Set to true for testing the dashboard
+const isAuthenticated = true; // Changed from false to true for testing the dashboard
 
 // Auth guard component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
