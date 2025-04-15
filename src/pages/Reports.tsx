@@ -1,24 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Calendar, ChartPie, ChartBar, Download, Filter } from 'lucide-react';
 import { 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend 
-} from 'recharts';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -65,13 +51,46 @@ const monthlyData = [
 ];
 
 const Reports: React.FC = () => {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+
+  // Generate available years (current year and 5 years back)
+  const availableYears = Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+  
   const [period, setPeriod] = useState('month');
-  const [year, setYear] = useState('2023');
-  const [month, setMonth] = useState('11'); // November
+  const [year, setYear] = useState(currentYear.toString());
+  const [month, setMonth] = useState(currentMonth.toString());
+  
+  // Update month selection if it's beyond the current month in the current year
+  useEffect(() => {
+    if (parseInt(year) === currentYear && parseInt(month) > currentMonth) {
+      setMonth(currentMonth.toString());
+    }
+  }, [year, month, currentYear, currentMonth]);
 
   const handleExportPDF = () => {
     alert('Exportando relatório como PDF...');
   };
+
+  // Generate available months based on year selection
+  const getAvailableMonths = () => {
+    // If it's the current year, only allow months up to the current month
+    // Otherwise, allow all 12 months
+    const monthLimit = parseInt(year) === currentYear ? currentMonth : 12;
+    
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    return Array.from({ length: monthLimit }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: monthNames[i]
+    }));
+  };
+
+  const availableMonths = getAvailableMonths();
 
   return (
     <DashboardLayout>
@@ -114,30 +133,27 @@ const Reports: React.FC = () => {
                 <SelectValue placeholder="Ano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2022">2022</SelectItem>
-                <SelectItem value="2021">2021</SelectItem>
+                {availableYears.map((year) => (
+                  <SelectItem key={year} value={year}>{year}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
             {period === 'month' && (
-              <Select value={month} onValueChange={setMonth}>
+              <Select 
+                value={month} 
+                onValueChange={setMonth}
+                disabled={availableMonths.length === 0}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Mês" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Janeiro</SelectItem>
-                  <SelectItem value="2">Fevereiro</SelectItem>
-                  <SelectItem value="3">Março</SelectItem>
-                  <SelectItem value="4">Abril</SelectItem>
-                  <SelectItem value="5">Maio</SelectItem>
-                  <SelectItem value="6">Junho</SelectItem>
-                  <SelectItem value="7">Julho</SelectItem>
-                  <SelectItem value="8">Agosto</SelectItem>
-                  <SelectItem value="9">Setembro</SelectItem>
-                  <SelectItem value="10">Outubro</SelectItem>
-                  <SelectItem value="11">Novembro</SelectItem>
-                  <SelectItem value="12">Dezembro</SelectItem>
+                  {availableMonths.map((month) => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

@@ -10,6 +10,8 @@ import Register from "./pages/Register";
 import Transactions from "./pages/Transactions";
 import Categories from "./pages/Categories";
 import Reports from "./pages/Reports";
+import Accounts from "./pages/Accounts";
+import Budget from "./pages/Budget";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +60,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Categories />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/accounts" 
+            element={
+              <ProtectedRoute>
+                <Accounts />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/budget" 
+            element={
+              <ProtectedRoute>
+                <Budget />
               </ProtectedRoute>
             } 
           />
