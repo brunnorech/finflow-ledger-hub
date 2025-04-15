@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Plus, Pencil, Trash2, BanknoteIcon, Wallet, Bank } from 'lucide-react';
+import { CreditCard, Plus, Pencil, Trash2, BanknoteIcon, Wallet, BuildingIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -35,7 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 // Define account types with their respective icons
 const accountTypes = [
   { id: 'checking', name: 'Conta Corrente', icon: BanknoteIcon },
-  { id: 'savings', name: 'Conta Poupança', icon: Bank },
+  { id: 'savings', name: 'Conta Poupança', icon: BuildingIcon },
   { id: 'investment', name: 'Investimento', icon: CreditCard },
   { id: 'cash', name: 'Dinheiro', icon: Wallet },
   { id: 'credit', name: 'Cartão de Crédito', icon: CreditCard },

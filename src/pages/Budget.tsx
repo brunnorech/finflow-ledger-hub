@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -41,6 +40,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import BudgetChart from '@/components/Budget/BudgetChart';
+import { cn } from '@/lib/utils';
 
 // Mock categories data
 const categories = [
@@ -496,11 +496,12 @@ const Budget = () => {
                       <Progress 
                         value={percentUsed > 100 ? 100 : percentUsed} 
                         className="h-2" 
-                        indicatorClassName={
+                        className={cn(
+                          "h-2",
                           percentUsed > 90 ? "bg-destructive" : 
                           percentUsed > 70 ? "bg-yellow-500" : 
                           "bg-primary"
-                        }
+                        )}
                       />
                     </div>
                   );
