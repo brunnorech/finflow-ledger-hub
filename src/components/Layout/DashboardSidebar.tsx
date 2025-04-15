@@ -23,9 +23,15 @@ import {
   CreditCard,
   Tags
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const DashboardSidebar = () => {
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   return (
     <Sidebar>
       <SidebarHeader>
@@ -40,7 +46,7 @@ const DashboardSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild data-active={isActive('/')}>
                   <Link to="/" className="flex items-center gap-3">
                     <LayoutDashboard className="h-5 w-5" />
                     <span>Dashboard</span>
@@ -48,7 +54,7 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild data-active={isActive('/transactions')}>
                   <Link to="/transactions" className="flex items-center gap-3">
                     <Receipt className="h-5 w-5" />
                     <span>Transações</span>
@@ -56,18 +62,18 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/accounts" className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5" />
-                    <span>Contas</span>
+                <SidebarMenuButton asChild data-active={isActive('/categories')}>
+                  <Link to="/categories" className="flex items-center gap-3">
+                    <Tags className="h-5 w-5" />
+                    <span>Categorias</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/categories" className="flex items-center gap-3">
-                    <Tags className="h-5 w-5" />
-                    <span>Categorias</span>
+                <SidebarMenuButton asChild data-active={isActive('/accounts')}>
+                  <Link to="/accounts" className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5" />
+                    <span>Contas</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -79,7 +85,7 @@ const DashboardSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild data-active={isActive('/reports')}>
                   <Link to="/reports" className="flex items-center gap-3">
                     <BarChart4 className="h-5 w-5" />
                     <span>Relatórios</span>
@@ -87,7 +93,7 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild data-active={isActive('/budget')}>
                   <Link to="/budget" className="flex items-center gap-3">
                     <PieChart className="h-5 w-5" />
                     <span>Orçamento</span>
@@ -101,7 +107,7 @@ const DashboardSidebar = () => {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild data-active={isActive('/settings')}>
               <Link to="/settings" className="flex items-center gap-3">
                 <Settings className="h-5 w-5" />
                 <span>Configurações</span>

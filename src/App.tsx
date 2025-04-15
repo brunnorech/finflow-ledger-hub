@@ -8,6 +8,8 @@ import Dashboard from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Transactions from "./pages/Transactions";
+import Categories from "./pages/Categories";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Transactions />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/categories" 
+            element={
+              <ProtectedRoute>
+                <Categories />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reports" 
+            element={
+              <ProtectedRoute>
+                <Reports />
               </ProtectedRoute>
             } 
           />
