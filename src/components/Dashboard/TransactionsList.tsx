@@ -1,33 +1,32 @@
-
-import React from 'react';
-import { 
-  ArrowDownLeft, 
+import React from "react";
+import {
+  ArrowDownLeft,
   ArrowUpRight,
   MoreHorizontal,
-  Search
-} from 'lucide-react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+  Search,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export interface Transaction {
   id: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   category: string;
   date: string;
   account: string;
@@ -39,21 +38,21 @@ interface TransactionsListProps {
   showSearch?: boolean;
 }
 
-const TransactionsList: React.FC<TransactionsListProps> = ({ 
-  transactions, 
-  title, 
-  showSearch = false 
+const TransactionsList: React.FC<TransactionsListProps> = ({
+  transactions,
+  title,
+  showSearch = false,
 }) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR').format(date);
+    return new Intl.DateTimeFormat("pt-BR").format(date);
   };
 
   return (
@@ -87,22 +86,34 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
                 <TableRow key={transaction.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <div className={`rounded-full p-1.5 ${transaction.type === 'income' ? 'bg-income/10' : 'bg-expense/10'}`}>
-                        {transaction.type === 'income' ? (
+                      <div
+                        className={`rounded-full p-1.5 ${
+                          transaction.type === "income"
+                            ? "bg-income/10"
+                            : "bg-expense/10"
+                        }`}
+                      >
+                        {transaction.type === "income" ? (
                           <ArrowUpRight className="h-4 w-4 text-income" />
                         ) : (
                           <ArrowDownLeft className="h-4 w-4 text-expense" />
                         )}
                       </div>
-                      <span className="font-medium">{transaction.description}</span>
+                      <span className="font-medium">
+                        {transaction.description}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{transaction.category}</TableCell>
                   <TableCell>{formatDate(transaction.date)}</TableCell>
                   <TableCell>{transaction.account}</TableCell>
-                  <TableCell className={`text-right font-medium ${
-                    transaction.type === 'income' ? 'income-text' : 'expense-text'
-                  }`}>
+                  <TableCell
+                    className={`text-right font-medium ${
+                      transaction.type === "income"
+                        ? "income-text"
+                        : "expense-text"
+                    }`}
+                  >
                     {formatCurrency(transaction.amount)}
                   </TableCell>
                   <TableCell>
@@ -116,7 +127,9 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
                         <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Excluir
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -124,7 +137,10 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-6 text-muted-foreground"
+                >
                   Nenhuma transação encontrada
                 </TableCell>
               </TableRow>

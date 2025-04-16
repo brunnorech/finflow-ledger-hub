@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { 
-  Sidebar, 
-  SidebarContent, 
+import React from "react";
+import {
+  Sidebar,
+  SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
@@ -11,27 +10,33 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Wallet, 
-  BarChart4, 
-  Settings, 
+} from "@/components/ui/sidebar";
+import {
+  LayoutDashboard,
+  Receipt,
+  Wallet,
+  BarChart4,
+  Settings,
   PieChart,
   LogOut,
   CreditCard,
-  Tags
-} from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+  Tags,
+} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardSidebar = () => {
   const location = useLocation();
-  
+  const { logout } = useAuth();
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-  
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -46,7 +51,7 @@ const DashboardSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/')}>
+                <SidebarMenuButton asChild data-active={isActive("/")}>
                   <Link to="/" className="flex items-center gap-3">
                     <LayoutDashboard className="h-5 w-5" />
                     <span>Dashboard</span>
@@ -54,7 +59,10 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/transactions')}>
+                <SidebarMenuButton
+                  asChild
+                  data-active={isActive("/transactions")}
+                >
                   <Link to="/transactions" className="flex items-center gap-3">
                     <Receipt className="h-5 w-5" />
                     <span>Transações</span>
@@ -62,7 +70,10 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/categories')}>
+                <SidebarMenuButton
+                  asChild
+                  data-active={isActive("/categories")}
+                >
                   <Link to="/categories" className="flex items-center gap-3">
                     <Tags className="h-5 w-5" />
                     <span>Categorias</span>
@@ -70,7 +81,7 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/accounts')}>
+                <SidebarMenuButton asChild data-active={isActive("/accounts")}>
                   <Link to="/accounts" className="flex items-center gap-3">
                     <CreditCard className="h-5 w-5" />
                     <span>Contas</span>
@@ -85,7 +96,7 @@ const DashboardSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/reports')}>
+                <SidebarMenuButton asChild data-active={isActive("/reports")}>
                   <Link to="/reports" className="flex items-center gap-3">
                     <BarChart4 className="h-5 w-5" />
                     <span>Relatórios</span>
@@ -93,7 +104,7 @@ const DashboardSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-active={isActive('/budget')}>
+                <SidebarMenuButton asChild data-active={isActive("/budget")}>
                   <Link to="/budget" className="flex items-center gap-3">
                     <PieChart className="h-5 w-5" />
                     <span>Orçamento</span>
@@ -107,7 +118,7 @@ const DashboardSidebar = () => {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild data-active={isActive('/settings')}>
+            <SidebarMenuButton asChild data-active={isActive("/settings")}>
               <Link to="/settings" className="flex items-center gap-3">
                 <Settings className="h-5 w-5" />
                 <span>Configurações</span>
@@ -116,7 +127,10 @@ const DashboardSidebar = () => {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="flex items-center text-destructive gap-3 w-full">
+              <button
+                className="flex items-center text-destructive gap-3 w-full"
+                onClick={handleLogout}
+              >
                 <LogOut className="h-5 w-5" />
                 <span>Sair</span>
               </button>
