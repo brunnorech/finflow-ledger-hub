@@ -35,10 +35,19 @@ const transactionSchema = z.object({
     message: "O valor deve ser um número positivo",
   }),
   type: z.enum(["income", "expense"]),
-  category: z.string().min(1, "Selecione uma categoria"),
-  account: z.string().min(1, "Selecione uma conta"),
+  category: z.string().optional(),
+  account: z.string().optional(),
   date: z.string().min(1, "Selecione uma data"),
-  payMethod: z.string().min(1, "Selecione o método de pagamento"),
+  payMethod: z.string().optional(),
+}).refine((data) => {
+  // Para despesas, categoria, conta e método de pagamento são obrigatórios
+  if (data.type === "expense") {
+    return data.category && data.account && data.payMethod;
+  }
+  return true;
+}, {
+  message: "Para despesas, categoria, conta e método de pagamento são obrigatórios",
+  path: ["category"],
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
@@ -85,13 +94,27 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
   }, [activeTab, form]);
 
   const onSubmit = (data: TransactionFormValues) => {
+    // Para receitas, usar valores padrão se não fornecidos
+    const accountId = data.account || accounts[0]?.id;
+    const categoryId = data.category || categories[0]?.id;
+    const paymentMethod = data.payMethod || "PIX";
+
+    if (!accountId || !categoryId) {
+      toast({
+        title: "Erro",
+        description: "É necessário ter pelo menos uma conta e uma categoria cadastradas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const payload = {
       description: data.description,
       amount: parseFloat(data.amount),
       type: data.type.toUpperCase(),
-      paymentMethod: data.payMethod,
-      accountId: data.account,
-      categoryId: data.category,
+      paymentMethod,
+      accountId,
+      categoryId,
       date: data.date,
     };
 
@@ -162,14 +185,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria</FormLabel>
+                    <FormLabel>
+                      Categoria {activeTab === "expense" && <span className="text-red-500">*</span>}
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma categoria" />
+                          <SelectValue placeholder={
+                            activeTab === "expense" 
+                              ? "Selecione uma categoria" 
+                              : "Categoria (opcional)"
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -190,14 +219,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 name="account"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Conta</FormLabel>
+                    <FormLabel>
+                      Conta {activeTab === "expense" && <span className="text-red-500">*</span>}
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma conta" />
+                          <SelectValue placeholder={
+                            activeTab === "expense" 
+                              ? "Selecione uma conta" 
+                              : "Conta (opcional)"
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -218,14 +253,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 name="payMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Método de Pagamento</FormLabel>
+                    <FormLabel>
+                      Método de Pagamento {activeTab === "expense" && <span className="text-red-500">*</span>}
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o método" />
+                          <SelectValue placeholder={
+                            activeTab === "expense" 
+                              ? "Selecione o método" 
+                              : "Método (opcional)"
+                          } />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
