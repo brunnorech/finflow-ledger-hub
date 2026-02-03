@@ -1,101 +1,160 @@
-
-import React, { useState } from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from "react";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
-import CategoryForm from '@/components/Categories/CategoryForm';
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import CategoryForm from "@/components/Categories/CategoryForm";
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "@/hooks/useCategories";
 
-// Mock data
-const CATEGORIES = [
-  { id: '1', name: 'Alimentação', type: 'expense', color: '#FF6384', icon: '🍔' },
-  { id: '2', name: 'Moradia', type: 'expense', color: '#36A2EB', icon: '🏠' },
-  { id: '3', name: 'Transporte', type: 'expense', color: '#FFCE56', icon: '🚗' },
-  { id: '4', name: 'Saúde', type: 'expense', color: '#4BC0C0', icon: '⚕️' },
-  { id: '5', name: 'Lazer', type: 'expense', color: '#9966FF', icon: '🎮' },
-  { id: '6', name: 'Educação', type: 'expense', color: '#FF9F40', icon: '📚' },
-  { id: '7', name: 'Salário', type: 'income', color: '#26E7A6', icon: '💰' },
-  { id: '8', name: 'Freelance', type: 'income', color: '#5CDB95', icon: '💻' },
-  { id: '9', name: 'Investimentos', type: 'income', color: '#3A86FF', icon: '📈' },
-  { id: '10', name: 'Presentes', type: 'income', color: '#FB5607', icon: '🎁' },
-];
+const DEFAULT_COLOR = "#36A2EB";
+const DEFAULT_ICON = "📁";
+
+type CategoryFromApi = {
+  id: string;
+  name: string;
+  type: string;
+  userId: string;
+};
 
 const Categories: React.FC = () => {
-  const [categories, setCategories] = useState(CATEGORIES);
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryToEdit, setCategoryToEdit] = useState<any>(null);
+  const { data: categories = [], isLoading } = useCategories();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryToEdit, setCategoryToEdit] = useState<CategoryFromApi | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const filteredCategories = categories.filter((category) => {
-    const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = 
-      typeFilter === 'all' || 
-      (typeFilter === 'expense' && category.type === 'expense') ||
-      (typeFilter === 'income' && category.type === 'income');
-    
+  const filteredCategories = categories.filter((category: CategoryFromApi) => {
+    const matchesSearch = category.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const catType = category.type.toLowerCase();
+    const matchesType =
+      typeFilter === "all" ||
+      (typeFilter === "expense" && catType === "expense") ||
+      (typeFilter === "income" && catType === "income");
     return matchesSearch && matchesType;
   });
 
-  const handleSaveCategory = (category: any) => {
+  const handleSaveCategory = (formData: {
+    name: string;
+    type: string;
+    color: string;
+    icon: string;
+  }) => {
     if (categoryToEdit) {
-      // Update existing category
-      setCategories(categories.map(c => c.id === categoryToEdit.id ? {...category, id: categoryToEdit.id} : c));
-      toast({
-        title: "Categoria atualizada",
-        description: `A categoria ${category.name} foi atualizada com sucesso.`,
-      });
+      updateCategory.mutate(
+        {
+          id: categoryToEdit.id,
+          data: { name: formData.name, type: formData.type },
+        },
+        {
+          onSuccess: () => {
+            setCategoryToEdit(null);
+            setIsDialogOpen(false);
+            toast({
+              title: "Categoria atualizada",
+              description: `A categoria ${formData.name} foi atualizada com sucesso.`,
+            });
+          },
+          onError: () => {
+            toast({
+              title: "Erro",
+              description: "Não foi possível atualizar a categoria.",
+              variant: "destructive",
+            });
+          },
+        }
+      );
     } else {
-      // Add new category
-      const newCategory = {
-        ...category,
-        id: (categories.length + 1).toString(),
-      };
-      setCategories([...categories, newCategory]);
-      toast({
-        title: "Categoria criada",
-        description: `A categoria ${category.name} foi criada com sucesso.`,
-      });
+      createCategory.mutate(
+        { name: formData.name, type: formData.type },
+        {
+          onSuccess: () => {
+            setIsDialogOpen(false);
+            toast({
+              title: "Categoria criada",
+              description: `A categoria ${formData.name} foi criada com sucesso.`,
+            });
+          },
+          onError: () => {
+            toast({
+              title: "Erro",
+              description: "Não foi possível criar a categoria.",
+              variant: "destructive",
+            });
+          },
+        }
+      );
     }
-    setCategoryToEdit(null);
-    setIsDialogOpen(false);
   };
 
-  const handleEditCategory = (category: any) => {
+  const handleEditCategory = (category: CategoryFromApi) => {
     setCategoryToEdit(category);
     setIsDialogOpen(true);
   };
 
-  const handleDeleteCategory = (id: string) => {
-    setCategories(categories.filter(c => c.id !== id));
-    toast({
-      title: "Categoria excluída",
-      description: "A categoria foi excluída com sucesso.",
-      variant: "destructive",
+  const handleDeleteCategory = (category: CategoryFromApi) => {
+    deleteCategory.mutate(category.id, {
+      onSuccess: () => {
+        toast({
+          title: "Categoria excluída",
+          description: "A categoria foi excluída com sucesso.",
+          variant: "destructive",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a categoria.",
+          variant: "destructive",
+        });
+      },
     });
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[200px]">
+          <p className="text-muted-foreground">Carregando categorias...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Categorias</h1>
-          <p className="text-muted-foreground">Gerencie e organize suas categorias financeiras</p>
+          <p className="text-muted-foreground">
+            Gerencie e organize suas categorias financeiras
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button 
+            <Button
               className="flex items-center gap-2"
               onClick={() => setCategoryToEdit(null)}
             >
@@ -105,11 +164,20 @@ const Categories: React.FC = () => {
           </DialogTrigger>
           <DialogContent>
             <h2 className="text-lg font-semibold mb-4">
-              {categoryToEdit ? 'Editar Categoria' : 'Nova Categoria'}
+              {categoryToEdit ? "Editar Categoria" : "Nova Categoria"}
             </h2>
-            <CategoryForm 
-              initialData={categoryToEdit} 
-              onSubmit={handleSaveCategory} 
+            <CategoryForm
+              initialData={
+                categoryToEdit
+                  ? {
+                      name: categoryToEdit.name,
+                      type: categoryToEdit.type.toLowerCase(),
+                      color: DEFAULT_COLOR,
+                      icon: DEFAULT_ICON,
+                    }
+                  : undefined
+              }
+              onSubmit={handleSaveCategory}
             />
           </DialogContent>
         </Dialog>
@@ -141,34 +209,42 @@ const Categories: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredCategories.map((category) => (
+        {filteredCategories.map((category: CategoryFromApi) => (
           <Card key={category.id} className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between p-4">
               <div className="flex items-center space-x-2">
-                <div 
+                <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
-                  style={{ backgroundColor: category.color }}
+                  style={{ backgroundColor: DEFAULT_COLOR }}
                 >
-                  {category.icon}
+                  {DEFAULT_ICON}
                 </div>
                 <CardTitle className="text-base">{category.name}</CardTitle>
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                category.type === 'income' ? 'bg-income/10 text-income' : 'bg-expense/10 text-expense'
-              }`}>
-                {category.type === 'income' ? 'Receita' : 'Despesa'}
+              <span
+                className={`text-xs font-medium px-2 py-1 rounded-full ${
+                  category.type === "INCOME"
+                    ? "bg-income/10 text-income"
+                    : "bg-expense/10 text-expense"
+                }`}
+              >
+                {category.type === "INCOME" ? "Receita" : "Despesa"}
               </span>
             </CardHeader>
             <CardContent className="p-4 pt-0 flex justify-end space-x-2">
-              <Button variant="ghost" size="sm" onClick={() => handleEditCategory(category)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEditCategory(category)}
+              >
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Editar</span>
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-destructive hover:text-destructive/90"
-                onClick={() => handleDeleteCategory(category.id)}
+                onClick={() => handleDeleteCategory(category)}
               >
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Excluir</span>
@@ -177,6 +253,21 @@ const Categories: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {filteredCategories.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground border rounded-lg">
+          <p>
+            {categories.length === 0
+              ? "Nenhuma categoria cadastrada."
+              : "Nenhuma categoria encontrada com esse filtro."}
+          </p>
+          {categories.length === 0 && (
+            <p className="text-sm mt-1">
+              Clique em &quot;Nova Categoria&quot; para começar.
+            </p>
+          )}
+        </div>
+      )}
     </DashboardLayout>
   );
 };
