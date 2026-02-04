@@ -145,17 +145,17 @@ const Categories: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Categorias</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl font-bold sm:text-2xl">Categorias</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Gerencie e organize suas categorias financeiras
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto min-h-11"
               onClick={() => setCategoryToEdit(null)}
             >
               <PlusCircle className="h-4 w-4" />

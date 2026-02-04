@@ -23,32 +23,45 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateTransaction } from "@/hooks/useCreateTransaction";
 import { useMetadata } from "@/hooks/useMetadata";
-import { getMethodLabel } from "@/utils/format";
+import {
+  getMethodLabel,
+  formatDateToBR,
+  parseBRToISODate,
+} from "@/utils/format";
+import { DatePickerPtBr } from "@/components/ui/date-picker-ptbr";
 import { useCategories } from "@/hooks/useCategories";
 import { useAccounts } from "@/hooks/useAccounts";
 
-const transactionSchema = z.object({
-  description: z
-    .string()
-    .min(3, "A descrição deve ter pelo menos 3 caracteres"),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "O valor deve ser um número positivo",
-  }),
-  type: z.enum(["income", "expense"]),
-  category: z.string().optional(),
-  account: z.string().optional(),
-  date: z.string().min(1, "Selecione uma data"),
-  payMethod: z.string().optional(),
-}).refine((data) => {
-  // Para despesas, categoria, conta e método de pagamento são obrigatórios
-  if (data.type === "expense") {
-    return data.category && data.account && data.payMethod;
-  }
-  return true;
-}, {
-  message: "Para despesas, categoria, conta e método de pagamento são obrigatórios",
-  path: ["category"],
-});
+const transactionSchema = z
+  .object({
+    description: z
+      .string()
+      .min(3, "A descrição deve ter pelo menos 3 caracteres"),
+    amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: "O valor deve ser um número positivo",
+    }),
+    type: z.enum(["income", "expense"]),
+    category: z.string().optional(),
+    account: z.string().optional(),
+    date: z
+      .string()
+      .min(1, "Informe a data")
+      .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data deve estar no formato dd/mm/aaaa"),
+    payMethod: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // Para despesas, categoria, conta e método de pagamento são obrigatórios
+      if (data.type === "expense") {
+        return data.category && data.account && data.payMethod;
+      }
+      return true;
+    },
+    {
+      message: "Campo obrigatório",
+      path: ["category"],
+    }
+  );
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
@@ -85,7 +98,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
       category: "",
       account: "",
       payMethod: "",
-      date: new Date().toISOString().split("T")[0],
+      date: formatDateToBR(new Date()),
     },
   });
 
@@ -102,7 +115,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
     if (!accountId || !categoryId) {
       toast({
         title: "Erro",
-        description: "É necessário ter pelo menos uma conta e uma categoria cadastradas.",
+        description:
+          "É necessário ter pelo menos uma conta e uma categoria cadastradas.",
         variant: "destructive",
       });
       return;
@@ -115,7 +129,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
       paymentMethod,
       accountId,
       categoryId,
-      date: data.date,
+      date: parseBRToISODate(data.date),
     };
 
     mutate(payload, {
@@ -125,7 +139,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
           description: "Sua transação foi salva com sucesso.",
           variant: "success",
         });
-        form.reset();
+        const defaultValues: TransactionFormValues = {
+          description: "",
+          amount: "",
+          type: "expense",
+          category: "",
+          account: "",
+          payMethod: "",
+          date: formatDateToBR(new Date()),
+        };
+        setActiveTab("expense");
+        form.reset(defaultValues, { keepDefaultValues: true });
         if (onClose) onClose();
       },
       onError: (err: Error) => {
@@ -141,12 +165,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
   return (
     <div className="space-y-4">
       <Tabs
-        defaultValue="expense"
+        value={activeTab}
         onValueChange={(value) => setActiveTab(value as "income" | "expense")}
       >
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="expense">Despesa</TabsTrigger>
-          <TabsTrigger value="income">Receita</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-4 h-11">
+          <TabsTrigger value="expense" className="min-h-11">
+            Despesa
+          </TabsTrigger>
+          <TabsTrigger value="income" className="min-h-11">
+            Receita
+          </TabsTrigger>
         </TabsList>
 
         <Form {...form}>
@@ -158,7 +186,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descrição da transação" {...field} />
+                    <Input
+                      placeholder="Descrição da transação"
+                      className="min-h-11"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -172,7 +204,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 <FormItem>
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
-                    <Input placeholder="0,00" {...field} />
+                    <Input placeholder="0,00" className="min-h-11" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -186,19 +218,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Categoria {activeTab === "expense" && <span className="text-red-500">*</span>}
+                      Categoria{" "}
+                      {activeTab === "expense" && (
+                        <span className="text-red-500">*</span>
+                      )}
                     </FormLabel>
                     <Select
+                      key={`category-${field.value ?? "empty"}`}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={
-                            activeTab === "expense" 
-                              ? "Selecione uma categoria" 
-                              : "Categoria (opcional)"
-                          } />
+                        <SelectTrigger className="min-h-11">
+                          <SelectValue
+                            placeholder={
+                              activeTab === "expense"
+                                ? "Selecione uma categoria"
+                                : "Categoria (opcional)"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -220,19 +258,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Conta {activeTab === "expense" && <span className="text-red-500">*</span>}
+                      Conta{" "}
+                      {activeTab === "expense" && (
+                        <span className="text-red-500">*</span>
+                      )}
                     </FormLabel>
                     <Select
+                      key={`account-${field.value ?? "empty"}`}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={
-                            activeTab === "expense" 
-                              ? "Selecione uma conta" 
-                              : "Conta (opcional)"
-                          } />
+                        <SelectTrigger className="min-h-11">
+                          <SelectValue
+                            placeholder={
+                              activeTab === "expense"
+                                ? "Selecione uma conta"
+                                : "Conta (opcional)"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -254,19 +298,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Método de Pagamento {activeTab === "expense" && <span className="text-red-500">*</span>}
+                      Método de Pagamento{" "}
+                      {activeTab === "expense" && (
+                        <span className="text-red-500">*</span>
+                      )}
                     </FormLabel>
                     <Select
+                      key={`payMethod-${field.value ?? "empty"}`}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={
-                            activeTab === "expense" 
-                              ? "Selecione o método" 
-                              : "Método (opcional)"
-                          } />
+                        <SelectTrigger className="min-h-11">
+                          <SelectValue
+                            placeholder={
+                              activeTab === "expense"
+                                ? "Selecione o método"
+                                : "Método (opcional)"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -290,20 +340,31 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose }) => {
                 <FormItem>
                   <FormLabel>Data</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <DatePickerPtBr
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="dd/mm/aaaa"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2 pt-4">
               {onClose && (
-                <Button variant="outline" type="button" onClick={onClose}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={onClose}
+                  className="min-h-11 w-full sm:w-auto"
+                >
                   Cancelar
                 </Button>
               )}
-              <Button type="submit">Salvar Transação</Button>
+              <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                Salvar Transação
+              </Button>
             </div>
           </form>
         </Form>

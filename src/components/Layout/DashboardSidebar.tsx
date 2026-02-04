@@ -22,11 +22,12 @@ import {
   CreditCard,
   Tags,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
 
   const isActive = (path: string) => {
@@ -35,6 +36,7 @@ const DashboardSidebar = () => {
 
   const handleLogout = () => {
     logout();
+    navigate("/login", { replace: true });
   };
 
   return (

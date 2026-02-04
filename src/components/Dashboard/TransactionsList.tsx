@@ -36,12 +36,14 @@ interface TransactionsListProps {
   transactions: Transaction[];
   title: string;
   showSearch?: boolean;
+  onDelete?: (transaction: Transaction) => void;
 }
 
 const TransactionsList: React.FC<TransactionsListProps> = ({
   transactions,
   title,
   showSearch = false,
+  onDelete,
 }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -56,8 +58,8 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
   };
 
   return (
-    <div className="card-dashboard">
-      <div className="p-6 border-b">
+    <div className="card-dashboard min-w-0 w-full overflow-hidden">
+      <div className="p-4 sm:p-6 border-b">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{title}</h2>
           {showSearch && (
@@ -127,7 +129,10 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
                         <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => onDelete?.(transaction)}
+                        >
                           Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>

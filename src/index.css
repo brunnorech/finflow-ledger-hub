@@ -84,19 +84,32 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  #root {
+    overflow-x: hidden;
+    max-width: 100%;
+    min-width: 0;
   }
 }
 
 @layer components {
   .card-stats {
-    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6 transition-all hover:shadow-md;
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6 transition-all hover:shadow-md min-w-0;
   }
   
   .card-dashboard {
-    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md;
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md min-w-0;
   }
   
   .income-text {
@@ -113,5 +126,25 @@
   
   .balance-negative {
     @apply text-expense font-semibold;
+  }
+}
+
+/* Mobile: safe area e UX */
+@layer base {
+  @media (max-width: 767px) {
+    body {
+      padding-left: env(safe-area-inset-left, 0);
+      padding-right: env(safe-area-inset-right, 0);
+    }
+    /* Evita zoom no iOS ao focar em input (font-size >= 16px) */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }

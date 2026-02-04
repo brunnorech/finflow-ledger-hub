@@ -278,10 +278,10 @@ const Accounts = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Contas Financeiras</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl font-bold sm:text-2xl">Contas Financeiras</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Gerencie suas contas bancárias e financeiras
           </p>
         </div>
@@ -292,7 +292,7 @@ const Accounts = () => {
                 setCurrentAccount(null);
                 setIsDialogOpen(true);
               }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto min-h-11"
             >
               <Plus className="h-4 w-4" />
               Nova Conta

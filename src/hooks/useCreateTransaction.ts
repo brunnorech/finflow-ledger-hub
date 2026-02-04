@@ -16,8 +16,9 @@ export const useCreateTransaction = () => {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["dashboard"] as any);
-      queryClient.invalidateQueries(["transactions", 5] as any);
+      // Atualiza dashboard e listas de transações (recentes e paginadas)
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] as any });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] as any });
     },
   });
 };

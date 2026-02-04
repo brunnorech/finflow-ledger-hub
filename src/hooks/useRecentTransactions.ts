@@ -7,24 +7,25 @@ type TRecentTransactions = Transaction;
 export const useRecentTransactions = (limit: number = 5) => {
   const fetchWithAuth = useAuthorizedFetch();
 
-  return useQuery({
-    queryKey: ["transactions", limit],
+  return useQuery<TRecentTransactions[]>({
+    queryKey: ["transactions", "recent", limit],
     queryFn: async () => {
-      const res = await fetchWithAuth(`/transactions?limit=${limit}`);
-      if (!res.ok) throw new Error("Erro ao buscar transações");
+      const res = await fetchWithAuth(`/transactions/recents?limit=${limit}`);
+      if (!res.ok) throw new Error("Erro ao buscar transações recentes");
       const data = await res.json();
 
-      console.log({ data })
-
-      return data.map((item) => ({
-        account: item.account.name,
-        amount: item.amount,
-        category: item.category.name,
-        date: item.date,
-        description: item.description,
-        type: item.type.toLowerCase(),
-        id: item.id,
-      } as TRecentTransactions)) as TRecentTransactions[]
+      return data.map(
+        (item: any): TRecentTransactions => ({
+          id: item.id,
+          description: item.description,
+          amount: item.amount,
+          type:
+            (item.type || "").toLowerCase() === "income" ? "income" : "expense",
+          category: item.category?.name || "Sem categoria",
+          date: item.date,
+          account: item.account?.name || "Sem conta",
+        })
+      );
     },
   });
 };

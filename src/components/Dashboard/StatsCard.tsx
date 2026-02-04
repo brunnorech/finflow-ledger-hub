@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
@@ -9,7 +8,7 @@ interface StatsCardProps {
   change?: {
     value: string;
     percentage: string;
-    trend: 'up' | 'down' | 'neutral';
+    trend: "up" | "down" | "neutral";
   };
   icon?: React.ReactNode;
   className?: string;
@@ -24,30 +23,30 @@ const StatsCard: React.FC<StatsCardProps> = ({
 }) => {
   return (
     <div className={cn("card-stats", className)}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        {icon && (
-          <div className="text-muted-foreground">
-            {icon}
-          </div>
-        )}
+      <div className="flex items-center justify-between min-w-0 gap-2">
+        <h3 className="text-sm font-medium text-muted-foreground truncate">
+          {title}
+        </h3>
+        {icon && <div className="text-muted-foreground shrink-0">{icon}</div>}
       </div>
-      <div className="mt-2">
-        <p className="text-2xl font-bold">{value}</p>
+      <div className="mt-2 min-w-0 overflow-hidden">
+        <p className="text-xl sm:text-2xl font-bold truncate" title={value}>
+          {value}
+        </p>
         {change && (
           <div className="flex items-center mt-1 text-sm">
-            {change.trend === 'up' ? (
+            {change.trend === "up" ? (
               <ArrowUpRight className="h-4 w-4 text-income mr-1" />
-            ) : change.trend === 'down' ? (
+            ) : change.trend === "down" ? (
               <ArrowDownRight className="h-4 w-4 text-expense mr-1" />
             ) : null}
             <span
               className={cn(
-                change.trend === 'up' 
-                  ? 'text-income' 
-                  : change.trend === 'down' 
-                  ? 'text-expense' 
-                  : 'text-muted-foreground'
+                change.trend === "up"
+                  ? "text-income"
+                  : change.trend === "down"
+                  ? "text-expense"
+                  : "text-muted-foreground"
               )}
             >
               {change.value} ({change.percentage})
